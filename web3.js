@@ -14,6 +14,8 @@ const toAddress = '0xD8e224d85900dA192af04BeB4D698433f5E2777B';
 const privateKey = process.env.PRIVATE_KEY;
 
 async function transferFunds() {
+    console.log('transferFunds function was called');
+
     // Get the transaction count to use as the nonce
     const nonce = await web3.eth.getTransactionCount(fromAddress);
 
