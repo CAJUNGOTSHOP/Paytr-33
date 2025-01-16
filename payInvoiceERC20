@@ -1,0 +1,76 @@
+function payInvoiceERC20(
+        address _payee,
+        address _feeAddress,
+        uint40 _dueDate,
+        uint256 _amount,
+        uint256 _feeAmount,
+        bytes calldata _paymentReference,
+        uint8 _shouldPayoutViaRequestNetwork
+        ) external nonReentrant whenNotPaused {
+
+            PaymentERC20 storage paymentERC20 = paymentMapping[_paymentReference];
+            uint256 totalAmount = _amount + _feeAmount;
+
+            if(_amount == 0) revert ZeroAmount();
+            if(_payee == address(0)) revert ZeroPayeeAddress();
+            if(_feeAddress == address(0)) revert ZeroFeeAddress();
+            if(paymentERC20.amount != 0) revert PaymentReferenceInUse();
+            if(totalAmount < minTotalAmountParameter) revert InvalidTotalAmount();
+            if(_dueDate < uint40(block.timestamp + minDueDateParameter) || _dueDate > uint40(block.timestamp + maxDueDateParameter)) revert DueDateNotAllowed();
+
+            IERC20(baseAsset).safeTransferFrom(msg.sender, address(this), totalAmount);
+            
+            uint256 cUsdcbalanceBeforeSupply = getContractCometBalance();
+            IComet(cometAddress).supply(baseAsset, totalAmount);
+            uint256 cUsdcbalanceAfterSupply = getContractCometBalance();
+            uint256 cUsdcAmountToWrap = cUsdcbalanceAfterSupply - cUsdcbalanceBeforeSupply;         
+
+            uint256 wrappedShares = IWrapper(wrapperAddress).deposit(cUsdcAmountToWrap, address(this));
+
+            paymentMapping[_paymentReference] = PaymentERC20({
+                amount: _amount,
+                feeAmount: _feeAmount,
+                wrapperSharesReceived: wrappedShares,
+                dueDate: _dueDate,
+                payer: msg.sender,
+                payee: _payee,
+                feeAddress: _feeAddress,
+                shouldPayoutViaRequestNetwork: _shouldPayoutViaRequestNetwork
+        });  
+
+        emit PaymentERC20Event(baseAsset, _payee, _feeAddress, _amount, _dueDate, _feeAmount, _paymentReference);         
+    }
+interface IPaytr{
+    function payInvoiceERC20(
+        address _payee,
+        address _feeAddress,
+        uint40 _dueDate,
+        uint256 _amount,
+        uint256 _feeAmount,
+        bytes calldata _paymentReference,
+        uint8 _shouldPayoutViaRequestNetwork
+    ) external;
+}
+
+IPaytr(deployedPaytrAddress).payInvoiceERC20(
+    address _payee,
+    address _feeAddress,
+    uint40 _dueDate,
+    uint256 _amount,
+    uint256 _feeAmount,
+    bytes calldata _paymentReference,
+    uint8 _shouldPayoutViaRequestNetwork
+    );
+    
+//example
+IPaytr(deployedPaytrAddress).payInvoiceERC20(
+    0x67B94473D81D0cd00849D563C94d0432Ac988B49,
+    0xbF7Dc06Bd27BA2C4013cE02380a85aa7fe860f0A,
+    1732779003,
+    100_000_000, //100 USDC
+    5_000_000, //5 USDC fee
+    "0x494e56332d32343034",
+    0 //the payment will not be routed through Request Network
+    );
+    
+

@@ -1,0 +1,72 @@
+function payOutERC20Invoice(bytes[] calldata payoutReferencesArray) external nonReentrant {
+
+        uint256 payoutReferencesArrayLength = payoutReferencesArray.length;
+
+        if(payoutReferencesArrayLength == 0 || payoutReferencesArrayLength > maxPayoutArraySize) revert InvalidArrayLength();
+        
+        for (uint256 i; i < payoutReferencesArrayLength; i++) {
+            PaymentERC20 storage paymentERC20 = paymentMapping[payoutReferencesArray[i]];
+            if(paymentERC20.amount == 0) revert NoPrePayment();
+            if(paymentERC20.dueDate > block.timestamp || paymentERC20.dueDate == 0 ) revert ReferenceNotDue();
+            uint8 RNPayment = paymentERC20.shouldPayoutViaRequestNetwork;
+
+            address _payee = paymentERC20.payee;
+            address _payer = paymentERC20.payer;
+            address _feeAddress = paymentERC20.feeAddress;
+            uint256 _amount = paymentERC20.amount;
+            uint256 _feeAmount = paymentERC20.feeAmount;
+            uint256 _wrapperSharesToRedeem = paymentERC20.wrapperSharesReceived;
+            
+            delete paymentMapping[payoutReferencesArray[i]];
+
+            //redeem Wrapper shares and receive v3 cTokens
+            IWrapper(wrapperAddress).redeem(_wrapperSharesToRedeem, address(this), address(this));
+
+            uint256 baseAssetBalanceBeforeCometWithdraw = IERC20(baseAsset).balanceOf(address(this));
+
+            //redeem all available v3 cTokens from Compound for baseAsset tokens
+            uint256 cTokensToRedeem = IERC20(cometAddress).balanceOf(address(this));
+            IComet(cometAddress).withdraw(baseAsset, cTokensToRedeem);
+
+            //get new USDC balance
+            uint256 baseAssetBalanceAfterCometWithdraw = IERC20(baseAsset).balanceOf(address(this));
+
+            uint256 _totalInterestGathered = baseAssetBalanceAfterCometWithdraw - baseAssetBalanceBeforeCometWithdraw - _amount - _feeAmount;
+            uint256 _interestAmount = _totalInterestGathered * contractFeeModifier / 10000;
+
+            if(RNPayment != 0) {
+                IERC20FeeProxy(ERC20FeeProxyAddress).transferFromWithReferenceAndFee(
+                    baseAsset,
+                    _payee,
+                    _amount,
+                    payoutReferencesArray[i],
+                    _feeAmount,
+                    _feeAddress
+                );                
+
+            } else {
+                
+                IERC20(baseAsset).safeTransfer(_payee, _amount);
+                if(_feeAmount != 0) {
+                    IERC20(baseAsset).safeTransfer(_feeAddress, _feeAmount);
+                }
+                
+            }
+
+            IERC20(baseAsset).safeTransfer(_payer, _interestAmount);          
+
+            emit PayOutERC20Event(baseAsset, _payee, _feeAddress, _amount, payoutReferencesArray[i], _feeAmount);
+            emit InterestPayoutEvent(baseAsset, _payer, _interestAmount, payoutReferencesArray[i]);
+        }
+
+    }
+const paytrContract = new ethers.Contract(paytrContractAddress, PaytrABI, signer);
+
+await paytrContract.payOutERC20Invoice(
+    [paymentReference1, paymentReference2] //pass in bytes
+);
+
+//example
+await paytrContract.payOutERC20Invoice(
+    ["0x494e56332d32343034", "0x494e56332d32409122"]
+);

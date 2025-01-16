@@ -1,0 +1,17 @@
+function getMapping(bytes memory _paymentReference) public view returns(PaymentERC20 memory) {
+        return paymentMapping[_paymentReference];
+    }
+const paytrContract = new ethers.Contract(paytrContractAddress, PaytrABI, signer);
+
+await paytrContract.getMapping(_paymentReference); //pass in bytes
+
+//example
+await paytrContract.getMapping("0x494e56332d32343034");
+)
+const paytrContract = new ethers.Contract(paytrContractAddress, PaytrABI, signer);
+
+await paytrContract.getMapping(_paymentReference); //pass in bytes
+
+//example
+await paytrContract.getMapping("0x494e56332d32343034");
+)
