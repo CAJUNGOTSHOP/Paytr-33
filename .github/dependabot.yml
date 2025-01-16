@@ -1,6 +1,5 @@
-version: 2
-updates:
-  - package-ecosystem: "npm, pip, etc." # See documentation for possible values
-    directory: "/" # Location of package manifests
-    schedule:
-      interval: "weekly"
+Configure Dependabot for version updates
+
+- Specify package ecosystems to update (npm, pip, etc).
+- Set the directory for package manifests.
+- Schedule updates to run weekly.
