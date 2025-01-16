@@ -17,3 +17,6 @@ runs = 256
 
 [profile.sepolia]
 fork_url = "https://sepolia.infura.io/v3/YOURKEY"
+
+[profile.mainnet]
+fork_url = "https://mainnet.infura.io/v3/YOURKEY"
