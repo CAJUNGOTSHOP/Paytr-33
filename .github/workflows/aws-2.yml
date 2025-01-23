@@ -103,4 +103,31 @@ jobs:
     version: # optional
     # The environment of the deploy (i.e. `production`)
     environment: # optional
+            - name: Rational Test Automation Server GitHub Action
+  # You may pin to the exact commit or the version.
+  # uses: IBM/devopsauto-testserver-actions@c704855bdbbae4f0df152919d00fb0bd40f67ee0
+  uses: IBM/devopsauto-testserver-actions@v1
+  with:
+    # Rational Test Automation Server URL
+    serverUrl: 
+    # Rational Test Automation Server Offline Token
+    offlineToken: 
+    # Team Space name
+    teamspace: 
+    # Project name
+    project: 
+    # Branch name in which the test exists
+    branch: 
+    # AssetId of the test in Rational Test Automation Server.
+    assetId: 
+    # Optional. Test environment corresponding to the test. Mandatory to input the value if you want to run API test.
+    environment: # optional
+    # Optional. Comma (,) delimited values of datasets for the job to run, For example: source:replacement;source:replacement
+    datasets: # optional
+    # Optional. Labels corresponding to the test. For example: label1, label2
+    labels: # optional
+    # Optional. Secrets collection name for the job to run.
+    secretsCollection: # optional
+    # Optional. Variables corresponding to the test. You must enter the variables in the format: name_of_the_variable=value_of_the_variable
+    variables: # optional
           
