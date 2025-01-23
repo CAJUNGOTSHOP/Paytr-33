@@ -127,4 +127,25 @@ jobs:
     mvn-toolchain-id: # optional
     # Name of Maven Toolchain Vendor if the default name of "${distribution}" is not wanted. See examples of supported syntax in Advanced Usage file
     mvn-toolchain-vendor: # optional
+                      - name: Lightlytics Publisher
+  # You may pin to the exact commit or the version.
+  # uses: lightlytics/publisher@0dbe04a6743c38e602f504a4ccefd9935c243d3f
+  uses: lightlytics/publisher@latest
+  with:
+    # Relative path to the directory of which terraform init command executed
+    working-directory: 
+    # Hostname of Lightlytics environment (example: env.lightlytics.com)
+    ll-hostname: 
+    # Relative path to Terraform plan file (JSON format)
+    plan-json: # optional
+    # Optional, Terraform Cloud token used to retrieve terraform plan output
+    tfc-token: # optional
+    # Optional, Terraform Cloud run id that was created after using terraform plan command
+    tfc-run-id: # optional
+    # Relative path to Terraform graph file (dot format)
+    tf-graph: # optional
+    # Secret token per customer used for authentication with Lightlytics (stored in GitHub)
+    collection-token: 
+    # GitHub token used to send a comment on Pull requests
+    github-token: # optional
           
