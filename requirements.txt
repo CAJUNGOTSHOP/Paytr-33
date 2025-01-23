@@ -1,0 +1,5 @@
+flask
+requests
+numpy
+name: Install dependencies
+  run: pip install -r scripts/requirements.txt
