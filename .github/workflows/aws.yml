@@ -92,3 +92,15 @@ jobs:
         service: ${{ env.ECS_SERVICE }}
         cluster: ${{ env.ECS_CLUSTER }}
         wait-for-service-stability: true
+                    - name: Velocity deploy action
+  # You may pin to the exact commit or the version.
+  # uses: codeclimate/velocity-deploy-action@1b4a22f0db113bf8d85c14fd726cf0ec6d17cd13
+  uses: codeclimate/velocity-deploy-action@v1.0.0
+  with:
+    # Your Velocity deployment token
+    token: 
+    # The version tag for the deploy (i.e. `b123`)
+    version: # optional
+    # The environment of the deploy (i.e. `production`)
+    environment: # optional
+          
